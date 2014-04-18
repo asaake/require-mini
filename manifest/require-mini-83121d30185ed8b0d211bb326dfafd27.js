@@ -14,11 +14,11 @@
       if (this.defines[name] != null) {
         throw new Error("define " + name + " is duplicate. override define is $define function.");
       }
-      return this.$define.apply(this, arguments);
+      this.$define.apply(this, arguments);
     };
 
     Require.prototype.$define = function() {
-      var dep, deps, func, name, _base, _i, _len, _results;
+      var dep, deps, func, name, _base, _i, _len;
       if (arguments.length < 2 || arguments.length > 3) {
         throw new Error("args is [name, func] or [name, deps, func]");
       }
@@ -41,41 +41,35 @@
         deps: deps,
         func: func
       };
-      _results = [];
       for (_i = 0, _len = deps.length; _i < _len; _i++) {
         dep = deps[_i];
         if ((_base = this.dependences)[dep] == null) {
           _base[dep] = {};
         }
-        _results.push(this.dependences[dep][name] = true);
+        this.dependences[dep][name] = true;
       }
-      return _results;
     };
 
     Require.prototype.undefine = function(name) {
-      var define, dep, _i, _len, _ref, _results;
+      var define, dep, _i, _len, _ref;
       this.unload(name);
       define = this.defines[name];
       delete this.defines[name];
       _ref = define.deps;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         dep = _ref[_i];
-        _results.push(delete this.dependences[dep][name]);
+        delete this.dependences[dep][name];
       }
-      return _results;
     };
 
     Require.prototype.unload = function(name) {
-      var dep, deps, _results;
+      var dep, deps;
       delete this.loaded[name];
       deps = this.dependences[name];
       if (deps != null) {
-        _results = [];
         for (dep in deps) {
-          _results.push(delete this.loaded[dep]);
+          delete this.loaded[dep];
         }
-        return _results;
       }
     };
 
@@ -141,6 +135,7 @@
       require = new Require();
       require.defines = Object.clone(this.defines);
       require.loaded = Object.clone(this.loaded);
+      require.dependences = Object.clone(this.dependences);
       return require;
     };
 
@@ -157,11 +152,11 @@
   this.require._ = require;
 
   this.define = function() {
-    return require.define.apply(require, arguments);
+    require.define.apply(require, arguments);
   };
 
   this.$define = function() {
-    return require.$define.apply(require, arguments);
+    require.$define.apply(require, arguments);
   };
 
 }).call(this);(function() {
@@ -200,4 +195,3 @@
 
 
 }).call(this);
-//# sourceMappingURL=require-mini-069582419fa56db1f0fe5e4b49705950.js.map
