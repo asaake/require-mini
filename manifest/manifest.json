@@ -1,0 +1,13 @@
+{
+  "assets": {
+    "require-mini.js": "require-mini-069582419fa56db1f0fe5e4b49705950.js"
+  },
+  "files": {
+    "require-mini-069582419fa56db1f0fe5e4b49705950.js": {
+      "logical_path": "require-mini.js",
+      "mtime": "2014-04-18T06:48:13.000Z",
+      "size": 5175,
+      "digest": "069582419fa56db1f0fe5e4b49705950"
+    }
+  }
+}
