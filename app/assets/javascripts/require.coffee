@@ -10,6 +10,7 @@ class @Require
     if @defines[name]?
       throw new Error("define #{name} is duplicate. override define is $define function.")
     @$define.apply(@, arguments)
+    return
 
   $define: () ->
     if arguments.length < 2 || arguments.length > 3
@@ -36,12 +37,15 @@ class @Require
       @dependences[dep] ?= {}
       @dependences[dep][name] = true
 
+    return
+
   undefine: (name) ->
     @unload(name)
     define = @defines[name]
     delete @defines[name]
     for dep in define.deps
       delete @dependences[dep][name]
+    return
 
   unload: (name) ->
     delete @loaded[name]
@@ -49,6 +53,7 @@ class @Require
     if deps?
       for dep of deps
         delete @loaded[dep]
+    return
 
   run: () ->
     if arguments.length < 1 || arguments.length > 2
@@ -71,7 +76,7 @@ class @Require
     for dep in deps
       args.push(@load(dep, parent))
 
-    func.apply(null, args)
+    return func.apply(null, args)
 
   load: (name, parent=null) ->
 
@@ -97,20 +102,23 @@ class @Require
     require = new Require()
     require.defines = Object.clone(@defines)
     require.loaded = Object.clone(@loaded)
+    require.dependences = Object.clone(@dependences)
     return require
 
 require = new @Require()
 
 @require = () ->
-  require.run.apply(require, arguments)
+  return require.run.apply(require, arguments)
 
 @require._ = require
 
 @define = () ->
   require.define.apply(require, arguments)
+  return
 
 @$define = () ->
   require.$define.apply(require, arguments)
+  return
 
 
 

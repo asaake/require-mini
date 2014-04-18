@@ -112,7 +112,7 @@ describe "Require", () ->
     expect(@require.defines["define"]).to.not.ok()
     expect(@require.loaded["define"]).to.not.ok()
 
-  it "clone: definesとloadedを引き継いだ新しいRequireオブジェクトを作成する", () ->
+  it "clone: definesとloadedとdependencesを引き継いだ新しいRequireオブジェクトを作成する", () ->
     @require.define("item1", () -> "item1")
     @require.define("item2", () -> "item2")
     @require.define("box", ["item1", "item2"], (item1, item2) -> {items: [item1, item2]})
@@ -121,6 +121,7 @@ describe "Require", () ->
     clone = @require.clone()
     expect(clone.defines).to.eql(@require.defines)
     expect(clone.loaded).to.eql(@require.loaded)
+    expect(clone.dependences).to.eql(@require.dependences)
 
   it "$define: 既に関数定義があるものに対して、もう一度関数定義を行うことができる", () ->
     @require.define("item1", () -> "item1")
