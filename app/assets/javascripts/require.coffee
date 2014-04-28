@@ -1,48 +1,62 @@
 class @Require
 
   constructor: () ->
-    @defines = {}
+    @defined = {}
     @loaded = {}
     @dependences = {}
 
+  createDef: (args) ->
+    def = {
+      name: null
+      deps: []
+      func: null
+    }
+    if Object.isString(args[0])
+      def.name = args[0]
+      if args.length == 2
+        def.func = args[1]
+      if args.length == 3
+        def.deps = args[1]
+        def.func = args[2]
+    else if Object.isArray(args[0])
+      def.deps = args[0]
+      def.func = args[1]
+    else if Object.isFunction(args[0])
+      def.func = args[0]
+
+    # validate
+    valid = true
+    valid = valid && (!(def.name?) || Object.isString(def.name))
+    valid = valid && (Object.isArray(def.deps))
+    valid = valid && (Object.isFunction(def.func))
+
+    if !valid
+      new Error("args is [name, func] or [name, deps, func], or [deps, func], or [func]")
+
+    return def
+
   define: () ->
-    name = arguments[0]
-    if @defines[name]?
-      throw new Error("define #{name} is duplicate. override define is $define function.")
+    def = @createDef(arguments)
+    if def.name? && @defined[def.name]?
+      throw new Error("define #{def.name} is duplicate. override define is $define function.")
     @$define.apply(@, arguments)
     return
 
   $define: () ->
-    if arguments.length < 2 || arguments.length > 3
-      throw new Error("args is [name, func] or [name, deps, func]")
+    def = @createDef(arguments)
+    @undefine(def.name) if @defined[def.name]?
+    @defined[def.name] = def
 
-    switch arguments.length
-      when 2
-        name = arguments[0]
-        func = arguments[1]
-        deps = []
-      when 3
-        name = arguments[0]
-        deps = arguments[1]
-        func = arguments[2]
-
-    @undefine(name) if @defines[name]?
-    @defines[name] = {
-      name: name
-      deps: deps
-      func: func
-    }
-
-    for dep in deps
+    for dep in def.deps
       @dependences[dep] ?= {}
-      @dependences[dep][name] = true
+      @dependences[dep][def.name] = true
 
     return
 
   undefine: (name) ->
     @unload(name)
-    define = @defines[name]
-    delete @defines[name]
+    define = @defined[name]
+    delete @defined[name]
     for dep in define.deps
       delete @dependences[dep][name]
     return
@@ -59,34 +73,23 @@ class @Require
     if arguments.length < 1 || arguments.length > 2
       throw new Error("args is [func] or [deps, func]")
 
-    switch arguments.length
-      when 1
-        func = arguments[0]
-        deps = []
-      when 2
-        deps = arguments[0]
-        func = arguments[1]
-
-    parent = {
-      name: "require-run"
-      deps: deps
-      func: func
-    }
+    def = @createDef(arguments)
     args = []
-    for dep in deps
-      args.push(@load(dep, parent))
+    for dep in def.deps
+      args.push(@load(dep, def))
 
-    return func.apply(null, args)
+    return def.func.apply(null, args)
 
   load: (name, parent=null) ->
 
     return @ if name == "require"
     return @loaded[name] if (@loaded[name])
 
-    define = @defines[name]
+    define = @defined[name]
     if not(define?)
       msg = "#{name} is not defined."
       if (parent?)
+        msg += "\n  name to [" + (parent.name) + "]"
         msg += "\n  deps to [#{parent.deps.toString()}]"
         msg += "\n  source to #{parent.func.toString()}"
       throw new Error(msg)
@@ -100,7 +103,7 @@ class @Require
 
   clone: () ->
     require = new Require()
-    require.defines = Object.clone(@defines)
+    require.defined = Object.clone(@defined)
     require.loaded = Object.clone(@loaded)
     require.dependences = Object.clone(@dependences)
     return require

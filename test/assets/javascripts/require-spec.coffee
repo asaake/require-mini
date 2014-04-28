@@ -19,7 +19,7 @@ describe "Require", () ->
 
   it "define: 関数の定義ができる", () ->
     @require.define("define", {})
-    define = @require.defines["define"]
+    define = @require.defined["define"]
     expect(define.name).to.eql("define")
     expect(define.func).to.eql({})
     expect(define.deps).to.eql([])
@@ -56,6 +56,7 @@ describe "Require", () ->
     catch e
       expect(e.message).to.eql("""
         define is not defined.
+          name to [#{parent.name}]
           deps to [#{parent.deps.toString()}]
           source to #{parent.func.toString()}
       """)
@@ -105,21 +106,21 @@ describe "Require", () ->
   it "undefine: 定義した関数を削除できる", () ->
     @require.define("define", () -> {})
     @require.load("define")
-    expect(@require.defines["define"]).to.ok()
+    expect(@require.defined["define"]).to.ok()
     expect(@require.loaded["define"]).to.ok()
 
     @require.undefine("define")
-    expect(@require.defines["define"]).to.not.ok()
+    expect(@require.defined["define"]).to.not.ok()
     expect(@require.loaded["define"]).to.not.ok()
 
-  it "clone: definesとloadedとdependencesを引き継いだ新しいRequireオブジェクトを作成する", () ->
+  it "clone: definedとloadedとdependencesを引き継いだ新しいRequireオブジェクトを作成する", () ->
     @require.define("item1", () -> "item1")
     @require.define("item2", () -> "item2")
     @require.define("box", ["item1", "item2"], (item1, item2) -> {items: [item1, item2]})
     @require.load("box")
 
     clone = @require.clone()
-    expect(clone.defines).to.eql(@require.defines)
+    expect(clone.defined).to.eql(@require.defined)
     expect(clone.loaded).to.eql(@require.loaded)
     expect(clone.dependences).to.eql(@require.dependences)
 

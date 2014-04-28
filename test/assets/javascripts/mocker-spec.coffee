@@ -19,7 +19,7 @@ require ["mocker"], (Mocker) ->
 
       it "Mockを作成できる", () ->
         @mocker.mock("mock", () -> "mock")
-        expect(@mocker.require.defines["mock"]).to.ok()
+        expect(@mocker.require.defined["mock"]).to.ok()
 
       it "作成したMockを起動することができる", () ->
         @mocker.mock("mock", () -> "mock")
