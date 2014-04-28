@@ -1,13 +1,13 @@
 {
   "assets": {
-    "require-mini.js": "require-mini-83121d30185ed8b0d211bb326dfafd27.js"
+    "require-mini.js": "require-mini-a612941a263d1a90d1b79d2acd945cc0.js"
   },
   "files": {
-    "require-mini-83121d30185ed8b0d211bb326dfafd27.js": {
+    "require-mini-a612941a263d1a90d1b79d2acd945cc0.js": {
       "logical_path": "require-mini.js",
-      "mtime": "2014-04-18T08:43:15.000Z",
-      "size": 5003,
-      "digest": "83121d30185ed8b0d211bb326dfafd27"
+      "mtime": "2014-04-28T08:50:50.000Z",
+      "size": 5382,
+      "digest": "a612941a263d1a90d1b79d2acd945cc0"
     }
   }
 }

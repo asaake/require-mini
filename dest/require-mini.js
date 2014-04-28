@@ -3,58 +3,74 @@
 
   this.Require = (function() {
     function Require() {
-      this.defines = {};
+      this.defined = {};
       this.loaded = {};
       this.dependences = {};
     }
 
+    Require.prototype.createDef = function(args) {
+      var def, valid;
+      def = {
+        name: null,
+        deps: [],
+        func: null
+      };
+      if (Object.isString(args[0])) {
+        def.name = args[0];
+        if (args.length === 2) {
+          def.func = args[1];
+        }
+        if (args.length === 3) {
+          def.deps = args[1];
+          def.func = args[2];
+        }
+      } else if (Object.isArray(args[0])) {
+        def.deps = args[0];
+        def.func = args[1];
+      } else if (Object.isFunction(args[0])) {
+        def.func = args[0];
+      }
+      valid = true;
+      valid = valid && (!(def.name != null) || Object.isString(def.name));
+      valid = valid && (Object.isArray(def.deps));
+      valid = valid && (Object.isFunction(def.func));
+      if (!valid) {
+        new Error("args is [name, func] or [name, deps, func], or [deps, func], or [func]");
+      }
+      return def;
+    };
+
     Require.prototype.define = function() {
-      var name;
-      name = arguments[0];
-      if (this.defines[name] != null) {
-        throw new Error("define " + name + " is duplicate. override define is $define function.");
+      var def;
+      def = this.createDef(arguments);
+      if ((def.name != null) && (this.defined[def.name] != null)) {
+        throw new Error("define " + def.name + " is duplicate. override define is $define function.");
       }
       this.$define.apply(this, arguments);
     };
 
     Require.prototype.$define = function() {
-      var dep, deps, func, name, _base, _i, _len;
-      if (arguments.length < 2 || arguments.length > 3) {
-        throw new Error("args is [name, func] or [name, deps, func]");
+      var def, dep, _base, _i, _len, _ref;
+      def = this.createDef(arguments);
+      if (this.defined[def.name] != null) {
+        this.undefine(def.name);
       }
-      switch (arguments.length) {
-        case 2:
-          name = arguments[0];
-          func = arguments[1];
-          deps = [];
-          break;
-        case 3:
-          name = arguments[0];
-          deps = arguments[1];
-          func = arguments[2];
-      }
-      if (this.defines[name] != null) {
-        this.undefine(name);
-      }
-      this.defines[name] = {
-        name: name,
-        deps: deps,
-        func: func
-      };
-      for (_i = 0, _len = deps.length; _i < _len; _i++) {
-        dep = deps[_i];
+      this.defined[def.name] = def;
+      _ref = def.deps;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        dep = _ref[_i];
         if ((_base = this.dependences)[dep] == null) {
           _base[dep] = {};
         }
-        this.dependences[dep][name] = true;
+        this.dependences[dep][def.name] = true;
       }
     };
 
     Require.prototype.undefine = function(name) {
       var define, dep, _i, _len, _ref;
       this.unload(name);
-      define = this.defines[name];
-      delete this.defines[name];
+      define = this.defined[name];
+      delete this.defined[name];
       _ref = define.deps;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         dep = _ref[_i];
@@ -74,30 +90,18 @@
     };
 
     Require.prototype.run = function() {
-      var args, dep, deps, func, parent, _i, _len;
+      var args, def, dep, _i, _len, _ref;
       if (arguments.length < 1 || arguments.length > 2) {
         throw new Error("args is [func] or [deps, func]");
       }
-      switch (arguments.length) {
-        case 1:
-          func = arguments[0];
-          deps = [];
-          break;
-        case 2:
-          deps = arguments[0];
-          func = arguments[1];
-      }
-      parent = {
-        name: "require-run",
-        deps: deps,
-        func: func
-      };
+      def = this.createDef(arguments);
       args = [];
-      for (_i = 0, _len = deps.length; _i < _len; _i++) {
-        dep = deps[_i];
-        args.push(this.load(dep, parent));
+      _ref = def.deps;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        dep = _ref[_i];
+        args.push(this.load(dep, def));
       }
-      return func.apply(null, args);
+      return def.func.apply(null, args);
     };
 
     Require.prototype.load = function(name, parent) {
@@ -111,10 +115,11 @@
       if (this.loaded[name]) {
         return this.loaded[name];
       }
-      define = this.defines[name];
+      define = this.defined[name];
       if (!(define != null)) {
         msg = "" + name + " is not defined.";
         if ((parent != null)) {
+          msg += "\n  name to [" + parent.name + "]";
           msg += "\n  deps to [" + (parent.deps.toString()) + "]";
           msg += "\n  source to " + (parent.func.toString());
         }
@@ -133,7 +138,7 @@
     Require.prototype.clone = function() {
       var require;
       require = new Require();
-      require.defines = Object.clone(this.defines);
+      require.defined = Object.clone(this.defined);
       require.loaded = Object.clone(this.loaded);
       require.dependences = Object.clone(this.dependences);
       return require;
@@ -195,3 +200,4 @@
 
 
 }).call(this);
+//# sourceMappingURL=require-mini-a612941a263d1a90d1b79d2acd945cc0.js.map
