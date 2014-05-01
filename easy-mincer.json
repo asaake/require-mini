@@ -1,31 +1,43 @@
 {
   "port": 3000,
-  "serverRoot": "/assets",
-  "targets": ["require-mini.js"],
-  "paths": [
-    "bower_components",
-    "app/assets/javascripts",
-    "app/assets/stylesheets",
-    "app/assets/templates",
-    "test/assets/javascripts",
-    "test/assets/stylesheets",
-    "test/assets/templates"
-  ],
-  "publicPaths": [
-    "app/public/javascripts",
-    "app/public/stylesheets",
-    "app/public/templates"
-  ],
-  "rewrites": {
-    "/**": "/index.html"
+  "serverRoot": "/",
+  "assets": {
+    "contextRoot": "/assets",
+    "paths": [
+      "bower_components",
+      "app/assets/javascripts",
+      "app/assets/stylesheets",
+      "app/assets/templates",
+      "test/assets/javascripts",
+      "test/assets/stylesheets",
+      "test/assets/templates"
+    ],
+    "useSourceMaps": true
   },
-  "log": {
+  "public": {
+    "contextRoot": "/",
+    "paths": [
+      "app/public/javascripts",
+      "app/public/stylesheets",
+      "app/public/templates"
+    ]
+  },
+  "rewrite": {
+    "paths": {
+      "/**": "/index.html"
+    },
+    "ignorePaths": [
+      "/assets/**"
+    ]
+ },
+ "log": {
     "debug": false,
     "info": false,
     "warn": true,
     "error": true
   },
-  "useSourceMaps": true,
-  "useJsCompressor": false,
-  "useCssCompressor": false
+ "compile": {
+    "paths": ["require-mini.js"]
+ }
+
 }
